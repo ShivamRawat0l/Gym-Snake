@@ -19,6 +19,8 @@ class SnakeEnv(gym.Env):
         self.tempX , self.tempY = int(self.HeadX[0]/10)*10,int(self.HeadY[0]/10)*10
         self.Direction = 3
         self.addNode =False
+    def action_sample (self):
+        return int(random.randint(0,3))
     def step(self, action):
         self.reward= 0 
         if action==0 and self.Direction !=1 :
@@ -40,7 +42,7 @@ class SnakeEnv(gym.Env):
 
         if self.circlePosX - 10 <=int(self.HeadX[0]/10)*10 <=self.circlePosX +8 and self.circlePosY -10 <=int(self.HeadY[0]/10)*10 <=self.circlePosY +8 :
 
-            self.circlePosX , circlePosY = int(random.random() * (self.width-40) )+20, int(random.random()*(self.height-40))+20
+            self.circlePosX , self.circlePosY = int(random.random() * (self.width-40) )+20, int(random.random()*(self.height-40))+20
             self.circlePosX = int(self.circlePosX/10)*10
             self.circlePosY = int(self.circlePosY/10)*10
             while (self.circlePosX in self.originalPositionX and self.circlePosY in self.originalPositionY):
@@ -65,10 +67,50 @@ class SnakeEnv(gym.Env):
         self.done = False
         if int(self.HeadX[0]) < 10 or int(self.HeadX[0]) > self.width-20 or int(self.HeadY[0]) < 10 or int(self.HeadY[0]) > self.height-20:
             self.done=True
+        
+        self.observation =  [self.HeadX[0],self.HeadY[0],self.circlePosX,self.circlePosY]
+        left,right,front,back = 0,0,0,0
         for i in range(1,len(self.HeadX)):
             if(int(self.HeadX[0]/10)*10 ==int(self.HeadX[i]/10)*10 and int(self.HeadY[0]/10)*10==int(self.HeadY[i]/10)*10):
                 self.done=True
-        self.observation =  [1,2,3]
+            if(int(self.HeadX[0]/10)*10 ==((int(self.HeadX[i]/10)*10)-10)  and int(self.HeadY[0]/10)*10==int(self.HeadY[i]/10)*10):
+                if self.Direction==0:
+                    right=1
+                elif self.Direction== 1 :
+                    left=1
+                elif self.Direction==2 :
+                    back=1
+                elif self.Direction== 3 :
+                    front=1
+            if(int(self.HeadX[0]/10)*10 ==((int(self.HeadX[i]/10)*10)+10 ) and int(self.HeadY[0]/10)*10==int(self.HeadY[i]/10)*10):
+                if self.Direction==0:
+                    left=1
+                elif self.Direction== 1 :
+                    right=1
+                elif self.Direction==2 :
+                    front=1
+                elif self.Direction== 3 :
+                    back=1
+            if(int(self.HeadX[0]/10)*10 ==(int(self.HeadX[i]/10)*10)  and int(self.HeadY[0]/10)*10==(int(self.HeadY[i]/10)*10) -10):
+                if self.Direction==0:
+                    back=1
+                elif self.Direction== 1 :
+                    front=1
+                elif self.Direction==2 :
+                    right=1
+                elif self.Direction== 3 :
+                    left=1
+            if(int(self.HeadX[0]/10)*10 ==(int(self.HeadX[i]/10)*10)  and int(self.HeadY[0]/10)*10==(int(self.HeadY[i]/10)*10)+10):
+                if self.Direction==0:
+                    front=1
+                elif self.Direction== 1 :
+                    back=1
+                elif self.Direction==2 :
+                    left=1
+                elif self.Direction== 3 :
+                    right=1
+
+        self.observation.extend([front,left,right,self.Direction])
         return self.observation , self.reward, self.done , self.info
     def reset(self):
         self.speed = [2, 2]
